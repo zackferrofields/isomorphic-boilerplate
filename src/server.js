@@ -5,13 +5,14 @@ import Transmit from "react-transmit";
 import routes from "views/Routes";
 import url from "url";
 
-var hostname = process.env.HOSTNAME || "localhost";
+var host = process.env.HOSTNAME || "localhost";
+var port = process.env.PORT || 3000;
 
 /**
  * Start Hapi server on port 8000.
  */
 const server = new Server();
-server.connection({host: hostname, port: process.env.PORT || 8000});
+server.connection({host, port});
 server.start(function () {
 	console.info("==> ✅  Server is listening");
 	console.info("==> 🌎  Go to " + server.info.uri.toLowerCase());
@@ -73,7 +74,7 @@ server.ext("onPreResponse", (request, reply) => {
 				</html>`
 			);
 
-			const webserver = process.env.NODE_ENV === "production" ? "" : "//" + hostname + ":8080";
+			const webserver = process.env.NODE_ENV === "production" ? "" : "//" + host + ":8080";
 			output = Transmit.injectIntoMarkup(output, reactData, [`${webserver}/dist/client.js`]);
 
 			reply(output);
