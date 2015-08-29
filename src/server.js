@@ -1,85 +1,60 @@
-import {Server} from "hapi";
-import React from "react";
-import Router from "react-router";
-import Transmit from "react-transmit";
-import routes from "views/Routes";
-import url from "url";
+import { Server } from 'hapi';
+import ejs from 'ejs';
+import fs from 'fs';
+import Router from 'react-router';
+import routes from 'views/Routes';
+import Transmit from 'react-transmit';
+import url from 'url';
 
-var host = process.env.HOSTNAME || "localhost";
-var port = process.env.PORT || 3000;
+let host = process.env.HOSTNAME || 'localhost';
+let port = process.env.PORT || 3000;
 
-/**
- * Start Hapi server on port 8000.
- */
 const server = new Server();
 server.connection({host, port});
-server.start(function () {
-	console.info("==> ✅  Server is listening");
-	console.info("==> 🌎  Go to " + server.info.uri.toLowerCase());
+server.start(() => {
+  console.info('==> ✅  Server is listening');
+  console.info('==> 🌎  Go to ' + server.info.uri.toLowerCase());
 });
 
-/**
- * Attempt to serve static requests from the public folder.
- */
 server.route({
-	method:  "*",
-	path:    "/{params*}",
-	handler: (request, reply) => {
-		reply.file("static" + request.path);
-	}
+  method: '*',
+  path: '/{params*}',
+  handler: (request, reply) => {
+    reply.file('static' + request.path);
+  }
 });
 
-/**
- * Endpoint that proxies all GitHub API requests to https://api.github.com.
- */
 server.route({
-	method: "*",
-	path: "/api/github/{path*}",
-	handler: {
-		proxy: {
-			passThrough: true,
-			mapUri (request, callback) {
-				callback(null, url.format({
-					protocol: "https",
-					host:     "api.github.com",
-					pathname: request.params.path,
-					query:    request.query
-				}));
-			}
-		}
-	}
+  method: '*',
+  path: '/api/github/{path*}',
+  handler: {
+    proxy: {
+      passThrough: true,
+      mapUri(request, callback) {
+        callback(null, url.format({
+          protocol: 'https',
+          host: 'api.github.com',
+          pathname: request.params.path,
+          query: request.query
+        }));
+      }
+    }
+  }
 });
 
-/**
- * Catch dynamic requests here to fire-up React Router.
- */
-server.ext("onPreResponse", (request, reply) => {
-	if (typeof request.response.statusCode !== "undefined") {
-		return reply.continue();
-	}
-
-	Router.run(routes, request.path, (Handler, router) => {
-		Transmit.renderToString(Handler).then(({reactString, reactData}) => {
-			let output = (
-				`<!doctype html>
-				<html lang="en-us">
-					<head>
-						<meta charset="utf-8">
-						<title>react-isomorphic-starterkit</title>
-						<link rel="shortcut icon" href="/favicon.ico">
-					</head>
-					<body>
-						<div id="react-root">${reactString}</div>
-					</body>
-				</html>`
-			);
-
-			const webserver = process.env.NODE_ENV === "production" ? "" : "//" + host + ":8080";
-			output = Transmit.injectIntoMarkup(output, reactData, [`${webserver}/dist/client.js`]);
-
-			reply(output);
-		}).catch((error) => {
-			reply(error.stack).type("text/plain").code(500);
-		});
-	})
+server.ext('onPreResponse', (request, reply) => {
+  if (typeof request.response.statusCode !== 'undefined') return reply.continue();
+  Router.run(routes, request.path, (Handler, router) => {
+    Transmit.renderToString(Handler).then(({ reactString: content, reactData: data }) => {
+      fs.readFile('./views/index.ejs', 'utf-8', (err, template) => {
+        if (err) throw err;
+        let output = ejs.render(template, { content });
+        const webserver = process.env.NODE_ENV === 'production' ? '' : '//' + host + ':8080';
+        output = Transmit.injectIntoMarkup(output, data, [`${webserver}/dist/client.js`]);
+        reply(output);
+      });
+    }).catch((error) => {
+      reply(error.stack).type('text/plain').code(500);
+    });
+  });
 });
