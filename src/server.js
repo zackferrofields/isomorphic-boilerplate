@@ -17,17 +17,17 @@
 //   }
 // });
 
-import { injectIntoMarkup, renderToString } from 'react-transmit';
-import { readFile } from 'co-fs';
-import { render } from 'ejs';
-import { run } from 'react-router';
+import {injectIntoMarkup, renderToString} from 'react-transmit';
+import {readFile} from 'co-fs';
+import {render} from 'ejs';
+import {run} from 'react-router';
 import koa from 'koa';
-import Router from 'koa-router';
+import route from 'koa-router';
 import routes from 'views/Routes';
 import serve from 'koa-static';
 
 let app = koa();
-let router = new Router();
+let router = route();
 
 const host = process.env.HOSTNAME || 'localhost';
 const port = process.env.PORT || 3000;
