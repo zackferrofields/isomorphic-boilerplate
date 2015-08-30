@@ -19,7 +19,7 @@
   ],
   "main": "babel.server.js",
   "scripts": {
-    "start": "NODE_PATH=\"./src\" node ./babel.server",
+    "start": "NODE_PATH=\"./src\" node --harmony ./babel.server",
     "build": "node ./node_modules/webpack/bin/webpack.js --verbose --colors --display-error-details --config webpack.client.js",
     "watch-client": "node ./node_modules/webpack/bin/webpack.js --verbose --colors --display-error-details --config webpack.client-watch.js && node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --config webpack.client-watch.js",
     "watch": "node ./node_modules/concurrently/src/main.js --kill-others \"npm run watch-client\" \"npm run start\""
@@ -27,9 +27,12 @@
   "dependencies": {
     "babel": "5.8.20",
     "babel-plugin-typecheck": "1.2.0",
+    "co-fs": "^1.2.0",
     "ejs": "^2.3.3",
-    "hapi": "8.8.1",
     "isomorphic-fetch": "2.1.1",
+    "koa": "^1.0.0",
+    "koa-router": "^5.1.2",
+    "koa-static": "^1.4.9",
     "piping": "0.2.0",
     "react": "0.13.3",
     "react-inline-css": "1.2.0",
