@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, DefaultRoute} from 'react-router';
-import Main from 'views/Main';
+import Main from './Main';
 
 /**
 * ## Routes

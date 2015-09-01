@@ -23,7 +23,7 @@ import {render} from 'ejs';
 import {run} from 'react-router';
 import koa from 'koa';
 import route from 'koa-router';
-import routes from 'views/Routes';
+import routes from './views/Routes';
 import serve from 'koa-static';
 
 let app = koa();
